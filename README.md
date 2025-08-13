@@ -1,41 +1,51 @@
-MediLink Hospital Management System
+````markdow
+## 🚀 Features
+- 🩺 **Doctor Management** – View doctor profiles, specialties, and availability  
+- 📅 **Appointment Booking** – Patients can schedule, reschedule, or cancel appointments  
+- 💬 **Consultations** – Real-time patient-doctor consultation support  
+- 📝 **Prescriptions** – Generate and manage prescriptions digitally  
+- 📋 **Patient Records** – Track medical history, treatments, and visit logs  
+- 🛡️ **Authentication & Roles** – Secure login with admin, doctor, and patient roles  
+- 📊 **Dashboard & Reports** – Admin panel with operational insights  
 
-Medi_Link_HMS is a comprehensive hospital management system designed to streamline operations and improve efficiency across healthcare facilities. It enables users to access doctor information, book appointments, manage consultations, and handle prescriptions all in one platform.
+## 🛠️ Tech Stack
+- **Frontend:** React.js, Redux  
+- **Backend:** Node.js, Express.js  
+- **Database:** MongoDB  
+- **Authentication:** JWT (JSON Web Tokens)  
+- **Deployment:** Docker, AWS *(optional)*  
 
-🚀 Features
--🩺 Doctor Management – View doctor profiles, specialties, and availability
--📅 Appointment Booking – Patients can schedule, reschedule, or cancel appointments
--💬 Consultations – Real-time patient-doctor consultation support
--📝 Prescriptions – Generate and manage prescriptions digitally
--📋 Patient Records – Track medical history, treatments, and visit logs
--🛡️ Authentication & Roles – Secure login with admin, doctor, and patient roles
--📊 Dashboard & Reports – Admin panel with operational insights
+## 📦 Installation & Setup
+1. **Clone the repository**  
+   ```bash
+   git clone https://github.com/yourusername/Medi_Link_HMS.git
+````
 
-🛠️ Tech Stack
--Frontend: React.js, Redux
--Backend: Node.js, Express.js
--Database: MongoDB
--Authentication: JWT (JSON Web Tokens)
--Deployment: Docker, AWS (optional)
+2. **Install dependencies**
 
-📦 Installation
-# Clone the repository
-git clone https://github.com/yourusername/Medi_Link_HMS.git
+   ```bash
+   npm install
+   ```
 
-# Install dependencies
-npm install
+3. **Configure environment variables** (e.g., `.env` file)
 
-# Configure environment variables (e.g., .env file)
+4. **Start the backend server**
 
-# Start the development server
-cd backend
-npm run server
+   ```bash
+   cd backend
+   npm run server
+   ```
 
-#Load the Front end
-## admin panal
-cd admin
-npm run dev
+5. **Run the Admin Panel**
 
-## admin panal
-cd frontend
-npm run dev
+   ```bash
+   cd admin
+   npm run dev
+   ```
+
+6. **Run the User Frontend Panel**
+
+   ```bash
+   cd frontend
+   npm run dev
+   ```
