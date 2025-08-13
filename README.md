@@ -1,21 +1,22 @@
 MediLink Hospital Management System
+
 Medi_Link_HMS is a comprehensive hospital management system designed to streamline operations and improve efficiency across healthcare facilities. It enables users to access doctor information, book appointments, manage consultations, and handle prescriptions all in one platform.
 
 🚀 Features
-🩺 Doctor Management – View doctor profiles, specialties, and availability
-📅 Appointment Booking – Patients can schedule, reschedule, or cancel appointments
-💬 Consultations – Real-time patient-doctor consultation support
-📝 Prescriptions – Generate and manage prescriptions digitally
-📋 Patient Records – Track medical history, treatments, and visit logs
-🛡️ Authentication & Roles – Secure login with admin, doctor, and patient roles
-📊 Dashboard & Reports – Admin panel with operational insights
+-🩺 Doctor Management – View doctor profiles, specialties, and availability
+-📅 Appointment Booking – Patients can schedule, reschedule, or cancel appointments
+-💬 Consultations – Real-time patient-doctor consultation support
+-📝 Prescriptions – Generate and manage prescriptions digitally
+-📋 Patient Records – Track medical history, treatments, and visit logs
+-🛡️ Authentication & Roles – Secure login with admin, doctor, and patient roles
+-📊 Dashboard & Reports – Admin panel with operational insights
 
 🛠️ Tech Stack
-Frontend: React.js, Redux
-Backend: Node.js, Express.js
-Database: MongoDB
-Authentication: JWT (JSON Web Tokens)
-Deployment: Docker, AWS (optional)
+-Frontend: React.js, Redux
+-Backend: Node.js, Express.js
+-Database: MongoDB
+-Authentication: JWT (JSON Web Tokens)
+-Deployment: Docker, AWS (optional)
 
 📦 Installation
 # Clone the repository
