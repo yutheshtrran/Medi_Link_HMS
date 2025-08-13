@@ -1,0 +1,7 @@
+google-generativeai
+
+Flask
+Flask-Cors
+pandas
+openpyxl # Required for pandas to read .xlsx files
+# Add other dependencies your existing blueprints need (e.g., scikit-learn, numpy, torch, torchvision, Pillow, opencv-python, etc.)

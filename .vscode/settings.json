@@ -1,0 +1,6 @@
+{
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "python.analysis.extraPaths": [
+        "./Backend/tabular_routes"
+    ]
+}

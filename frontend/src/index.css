@@ -1,0 +1,45 @@
+/* ✅ Move @import to the top */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+/* Now define styles */
+* {
+    font-family: 'Outfit', sans-serif; /* Ensure Outfit is correctly used */
+}
+
+li {
+    cursor: pointer;
+    list-style: none; /* Remove bullet points */
+    
+}
+
+/* Tailwind @apply styles */
+.active hr {
+    @apply block;
+}
+
+/* Hide scrollbar */
+::-webkit-scrollbar {
+    display: none;
+}
+
+li:hover
+{
+    color: #07ccab;
+}
+
+@keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out;
+  }
+  
+
