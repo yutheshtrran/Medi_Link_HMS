@@ -402,7 +402,26 @@ const uploadMedicalReport = async (req, res) => {
     }
   }
   
+const getDoctorProfile = async (req, res) => {
+  try {
+    // Get doctor ID from JWT (set by auth middleware)
+    const doctorId = req.user?.id;
+    if (!doctorId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const doctor = await doctorModel.findById(doctorId).select('-password');
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    res.json({ success: true, doctor });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 //=================================================== Exporting Controllers =================================================
 
-export{changeAvailablity , getDoctorFeedbacks , uploadMedicalReport , loginDoctor , appointmentsDoctor , appointmentComplete , appointmentCancle , doctorDashboard , verifyDoctorCertificate}
+export{changeAvailablity , getDoctorFeedbacks , uploadMedicalReport , loginDoctor , appointmentsDoctor , appointmentComplete , appointmentCancle , doctorDashboard , verifyDoctorCertificate , getDoctorProfile}

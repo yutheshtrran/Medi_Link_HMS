@@ -4,6 +4,7 @@ import { appointmentCancle, appointmentComplete, appointmentsDoctor, doctorDashb
 import authDoctor from '../Middlewares/AuthDoctor.js';
 import upload from '../Middlewares/Multer.js';
 import localUpload from '../Middlewares/LocalUpload.js';
+import { getDoctorProfile } from '../Controllers/DoctorController.js';
 
 
 const doctorRouter = express.Router()
@@ -25,5 +26,7 @@ doctorRouter.post('/verify-certificate', upload.single('certificate'), authDocto
 doctorRouter.post('/upload-report' , localUpload.single('file') , authDoctor , uploadMedicalReport)
 
 doctorRouter.get('/feedbacks', authDoctor, getDoctorFeedbacks);
+
+doctorRouter.get('/profile', authDoctor, getDoctorProfile);
 
 export default doctorRouter
