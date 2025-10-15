@@ -47,7 +47,7 @@ function ViewDoctor() {
           },
           about:
             "This is a mock profile shown because the backend API could not be reached.",
-          image: "https://placehold.co/288x350/0d9488/ffffff?text=Doctor",
+          image: "https://placehold.co/200x240/cccccc/333333?text=Doctor",
         });
       } finally {
         setLoading(false);
@@ -59,8 +59,8 @@ function ViewDoctor() {
 
   if (loading)
     return (
-      <div className="m-5 text-center p-10 bg-white shadow-lg rounded-lg border border-teal-200">
-        <p className="text-xl text-teal-600 font-semibold">
+      <div className="m-5 text-center p-10 bg-white shadow rounded-lg border border-gray-200">
+        <p className="text-lg text-gray-700 font-semibold">
           Loading doctor profile... ⏳
         </p>
         <p className="text-sm text-gray-500 mt-2">
@@ -72,47 +72,45 @@ function ViewDoctor() {
   const docInfo = doctor || {};
   const addressInfo = docInfo.address || {};
   const imageSrc =
-    docInfo.image || "https://placehold.co/288x350/0d9488/ffffff?text=Doctor";
+    docInfo.image || "https://placehold.co/200x240/cccccc/333333?text=Doctor";
 
   return (
-    <div className="p-4 sm:p-8 bg-gradient-to-br from-teal-50 via-cyan-50 to-emerald-50 min-h-screen">
-      <h2 className="text-3xl font-bold text-teal-700 mb-6 border-b-4 border-teal-300 inline-block pb-2">
+    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-gray-300 inline-block pb-1">
         My Profile
       </h2>
 
-      <div className="flex flex-col sm:flex-row gap-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-teal-200">
+      <div className="flex flex-col sm:flex-row gap-6 bg-white p-5 rounded-xl shadow-md border border-gray-200">
         {/* Doctor Image */}
         <div className="flex-shrink-0">
           <img
-            className="w-full sm:max-w-72 h-auto rounded-2xl shadow-md object-cover ring-4 ring-teal-200"
+            className="w-40 h-48 rounded-xl shadow-sm object-cover border border-gray-200"
             src={imageSrc}
             alt={docInfo.name || "Doctor Profile"}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src =
-                "https://placehold.co/288x350/99f6e4/0f766e?text=Image+Not+Found";
+                "https://placehold.co/200x240/cccccc/333333?text=No+Image";
             }}
           />
         </div>
 
         {/* Doctor Details */}
-        <div className="flex-1 bg-gradient-to-br from-white to-teal-50 border border-teal-200 rounded-2xl p-8 shadow-sm">
-          <p className="text-3xl font-extrabold text-teal-700 mb-4">
+        <div className="flex-1">
+          <p className="text-2xl font-bold text-gray-800 mb-3">
             {docInfo.name || "Doctor Name N/A"}
           </p>
 
-          <div className="text-base text-gray-700 space-y-2">
+          <div className="text-sm text-gray-700 space-y-1">
             <DetailItem label="Degree" value={docInfo.degree} />
             <DetailItem label="University" value={docInfo.university} />
             <DetailItem label="Specialized" value={docInfo.speciality} isAccent />
             <DetailItem label="Experience" value={docInfo.experience} />
-            <div className="pt-2">
-              <DetailItem label="Contact Mobile" value={docInfo.mobile} />
-            </div>
+            <DetailItem label="Contact Mobile" value={docInfo.mobile} />
 
             {docInfo.address && (
               <div className="pt-2">
-                <span className="font-semibold text-teal-700 block">Address:</span>
+                <span className="font-semibold text-gray-800 block">Address:</span>
                 <p className="ml-4 text-sm text-gray-600">
                   {addressInfo.line1 || "N/A"}
                 </p>
@@ -124,9 +122,9 @@ function ViewDoctor() {
           </div>
 
           {/* About Section */}
-          <div className="mt-6 pt-4 border-t border-teal-200">
-            <p className="text-lg font-bold text-teal-800 mb-2">About Me</p>
-            <p className="text-sm text-gray-600 leading-relaxed max-w-[700px]">
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <p className="text-base font-semibold text-gray-800 mb-1">About Me</p>
+            <p className="text-sm text-gray-600 leading-relaxed max-w-[600px]">
               {docInfo.about ||
                 "No professional biography provided yet. Please update your profile."}
             </p>
@@ -139,14 +137,8 @@ function ViewDoctor() {
 
 const DetailItem = ({ label, value, isAccent = false }) => (
   <p>
-    <span className="font-semibold text-teal-700">{label}:</span>{" "}
-    <span
-      className={
-        isAccent
-          ? "font-medium text-emerald-600"
-          : "text-gray-700"
-      }
-    >
+    <span className="font-semibold text-gray-800">{label}:</span>{" "}
+    <span className={isAccent ? "font-medium text-gray-700" : "text-gray-600"}>
       {value || "N/A"}
     </span>
   </p>
