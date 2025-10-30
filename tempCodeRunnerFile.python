@@ -12,7 +12,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..', '..')) # Adjust path
 LIVER_MODEL_PATH = os.path.join(PROJECT_ROOT, 'ml_model', 'saved-model', 'liver_disease_model.pkl')
 
 liver_model = None
- 
+
 # Load the liver disease model
 try:
     if os.path.exists(LIVER_MODEL_PATH):
