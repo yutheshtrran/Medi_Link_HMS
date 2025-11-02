@@ -951,21 +951,6 @@ Reasoning: ${result.message}
           Health Risk Predictor
         </h1>
 
-        {/* Patient Name Input */}
-        <div className="mb-6">
-          <label htmlFor="patientName" className="block text-lg font-semibold text-teal-800 mb-2">
-            Patient Name (Optional):
-          </label>
-          <input
-            type="text"
-            id="patientName"
-            value={patientName}
-            onChange={handlePatientNameChange}
-            placeholder="e.g., John Doe"
-            className="block w-full pl-4 pr-10 py-3 text-base border-teal-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 appearance-none transition duration-150 ease-in-out bg-white"
-          />
-        </div>
-
         {/* Disease Selector */}
         <div className="mb-8">
           <label htmlFor="disease-select" className="block text-lg font-semibold text-teal-800 mb-2">
@@ -1048,81 +1033,10 @@ Reasoning: ${result.message}
           </button>
         </form>
 
-        {/* Report Upload Section (Now always conditional on supportsImage being true in disease config) */}
-        {selectedDisease.supportsImage && (
-          <div className="mt-8 pt-6 border-t border-teal-200 space-y-4">
-            <h3 className="text-2xl font-bold text-teal-800 text-center mb-4">
-              Upload Report for Analysis
-            </h3>
-            <div className="flex flex-col items-center space-y-4">
-              <label htmlFor="report-upload" className="block text-md font-medium text-teal-700">
-                Select a report file (e.g., PDF, JPG, PNG):
-              </label>
-              <input
-                type="file"
-                id="report-upload"
-                accept="image/*, application/pdf" 
-                onChange={handleImageChange}
-                className="block w-full max-w-xs text-sm text-teal-700 file:mr-4 file:py-2 file:px-4
-                           file:rounded-lg file:border-0 file:text-sm file:font-semibold
-                           file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100
-                           transition duration-150 ease-in-out cursor-pointer"
-              />
-              {imagePreviewUrl && imageFile && imageFile.type.startsWith('image/') && (
-                <div className="mt-4 text-center">
-                  <p className="text-teal-600 text-sm mb-2">Image Preview:</p>
-                  <img src={imagePreviewUrl} alt="Report Preview" className="max-w-full h-auto rounded-lg shadow-md border border-teal-200 object-contain mx-auto" style={{ maxHeight: '200px' }} />
-                </div>
-              )}
-              {imagePreviewUrl && imageFile && imageFile.type === 'application/pdf' && (
-                  <div className="mt-4 text-center text-teal-600">
-                      <p className="text-sm mb-2">PDF file selected. No preview available here, but it will be sent for analysis.</p>
-                  </div>
-              )}
-              <button
-                onClick={analyzeImageWithBackend}
-                className="w-full max-w-xs flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-xl font-semibold text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-200 ease-in-out transform hover:scale-105" 
-                disabled={isLoading || !imageFile}
-              >
-                {isImagePredicting ? 'Uploading & Analyzing...' : 'Upload & Analyze Report'}
-              </button>
-            </div>
-          </div>
-        )}
-
-
         {/* Prediction Results Display */}
         {(formPredictionResult || imagePredictionResult) && (
           <div className="mt-10 p-6 bg-teal-50 rounded-xl border border-teal-200 shadow-lg animate-fade-in">
-            <h3 className="text-2xl font-bold text-teal-800 mb-4 text-center">Your Hypothetical Risk:</h3>
 
-            {/* Form-based results - no longer needs separate loading indicator here */}
-            {formPredictionResult && !isFormPredicting && (
-              <div className="mb-6 pb-4 border-b border-teal-200 last:border-b-0">
-                <p className="text-xl font-semibold text-teal-700 mb-2">Form-Based Analysis:</p>
-                <p className="text-teal-700 text-center mt-4 text-lg leading-relaxed whitespace-pre-line">
-                  {formatResultMessage('form', formPredictionResult)}
-                </p>
-                <p className="text-4xl font-extrabold text-teal-900 flex items-center justify-center gap-3 mt-4">
-                  {formPredictionResult.stage}
-                  <span className="text-5xl animate-bounce-once">{formPredictionResult.indicator}</span>
-                </p>
-              </div>
-            )}
-
-            {/* Image-based results - no longer needs separate loading indicator here */}
-            {imagePredictionResult && !isImagePredicting && (
-              <div className="mt-6">
-                <p className="text-xl font-semibold text-teal-700 mb-2">Report Analysis (AI Model):</p>
-                <p className="text-teal-700 text-center mt-4 text-lg leading-relaxed whitespace-pre-line">
-                  {formatResultMessage('image', imagePredictionResult)}
-                </p>
-                <p className="text-4xl font-extrabold text-teal-900 flex items-center justify-center gap-3 mt-4">
-                  {imagePredictionResult.stage}
-                  <span className="text-5xl animate-bounce-once">{imagePredictionResult.indicator}</span>
-                </p>
-              </div>
-            )}
 
             <p className="text-sm text-teal-600 mt-6 italic text-center">
               Disclaimer: This tool provides a hypothetical risk assessment based on simplified logic and AI/ML analysis. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for any health concerns or before making any decisions related to your health.
