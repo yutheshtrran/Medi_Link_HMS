@@ -1,4 +1,3 @@
-# Backend/app.py
 import sys
 import os
 import random
@@ -28,17 +27,17 @@ except ImportError as e:
     print(f"⚠️ Could not import gemini_response: {e}")
 
 # === Route Blueprints ===
-from .data import data_bp
-from .cv_routes import cv_bp
-from .tabular_routes.diabetes import diabetes_bp
-from .tabular_routes.heart_disease import heart_bp
-from .tabular_routes.hypertension import hypertension_bp
-from .tabular_routes.ckd import ckd_bp
-from .calculator_routes.health_calculator import health_calc_bp
-from .tabular_routes.liver_disease import liver_bp
-from .tabular_routes.thyroid import thyroid_bp
-from .Routes.report_ocr_route import report_bp
-from .tabular_routes.cancer import cancer_bp
+from Backend.data import data_bp
+from Backend.cv_routes import cv_bp
+from Backend.tabular_routes.diabetes import diabetes_bp
+from Backend.tabular_routes.heart_disease import heart_bp
+from Backend.tabular_routes.hypertension import hypertension_bp
+from Backend.tabular_routes.ckd import ckd_bp
+from Backend.calculator_routes.health_calculator import health_calc_bp
+from Backend.tabular_routes.liver_disease import liver_bp
+from Backend.tabular_routes.thyroid import thyroid_bp
+from Backend.Routes.report_ocr_route import report_bp
+from Backend.tabular_routes.cancer import cancer_bp
 
 # =====================
 # FLASK APP CREATION
@@ -105,7 +104,7 @@ def create_app():
     # =====================
     # HEALTH CHECK ROUTE
     # =====================
-    @app.route('/')
+    @app.route('/', methods=['GET'])
     def index():
         return "Medi-Link Backend Server with Gemini 2.5 🚀"
 
@@ -118,11 +117,11 @@ def create_app():
     app.register_blueprint(heart_bp)
     app.register_blueprint(hypertension_bp)
     app.register_blueprint(ckd_bp)
-    app.register_blueprint(health_calc_bp)
     app.register_blueprint(liver_bp)
     app.register_blueprint(thyroid_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(cancer_bp)
+    app.register_blueprint(health_calc_bp)
 
     return app
 
