@@ -346,7 +346,7 @@ try:
     if 'target' not in df_thyroid.columns:
         raise ValueError("Target column 'target' not found in thyroid dataset.")
 
-    # Filter and convert target to binary: S=1, -=0
+    # ✅ Convert target to binary: S=1, -=0
     df_thyroid = df_thyroid[df_thyroid['target'].isin(['S', '-'])]
     df_thyroid['target'] = df_thyroid['target'].apply(lambda x: 1 if x == 'S' else 0)
 
@@ -356,17 +356,15 @@ try:
     numerical_features_thyroid = ['age', 'tsh', 't3', 'tt4', 't4u', 'fti', 'tbg']
     categorical_features_thyroid = [col for col in X_thyroid.columns if col not in numerical_features_thyroid]
 
-    # Clean and preprocess categorical features
+    # ✅ Clean categorical features
     for col in categorical_features_thyroid:
-        if col in X_thyroid.columns:
-            X_thyroid[col] = X_thyroid[col].astype(str).str.strip().str.lower()
+        X_thyroid[col] = X_thyroid[col].astype(str).str.strip().str.lower()
 
-    # Ensure numeric columns are converted properly
+    # ✅ Convert numeric features properly
     for col in numerical_features_thyroid:
-        if col in X_thyroid.columns:
-            X_thyroid[col] = pd.to_numeric(X_thyroid[col], errors='coerce')
+        X_thyroid[col] = pd.to_numeric(X_thyroid[col], errors='coerce')
 
-    # Preprocessing pipeline
+    # ✅ Preprocessing pipeline
     preprocessor_thyroid = ColumnTransformer(
         transformers=[
             ('num', Pipeline([
@@ -381,12 +379,14 @@ try:
         remainder='drop'
     )
 
+    # ✅ Model pipeline
     model_thyroid_pipeline = Pipeline([
         ('preprocessor', preprocessor_thyroid),
         ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))
     ])
 
-    # Train with Hyperparameter Tuning
+    # ✅ Train with tuning
+    print("🚀 Training Thyroid Disease model...")
     train_and_save_model(
         "Thyroid Disease", 
         model_thyroid_pipeline, 
@@ -397,79 +397,126 @@ try:
         tuning_params=XGB_PARAM_GRID
     )
 
+    # ✅ Save separate model and preprocessor
+    model_save_path = os.path.join(SAVE_MODEL_DIR, "thyroid_model.pkl")
+    preprocessor_save_path = os.path.join(SAVE_MODEL_DIR, "thyroid_preprocessor.pkl")
+
+    # Extract fitted parts
+    trained_classifier = model_thyroid_pipeline.named_steps['classifier']
+    fitted_preprocessor = model_thyroid_pipeline.named_steps['preprocessor']
+
+    with open(model_save_path, 'wb') as f:
+        pickle.dump(trained_classifier, f)
+    with open(preprocessor_save_path, 'wb') as f:
+        pickle.dump(fitted_preprocessor, f)
+
+    print(f"✅ Thyroid model saved to: {model_save_path}")
+    print(f"✅ Thyroid preprocessor saved to: {preprocessor_save_path}")
+
 except FileNotFoundError:
     print(f"⚠️ Warning: Thyroid dataset not found. Skipping Thyroid model training.")
 except Exception as e:
     print(f"❌ Error training Thyroid Disease model: {e}")
     traceback.print_exc()
 
+
 # -------------------------------------------------------------
 # --- 7. Cancer Disease Model Training (Tuned XGBoost) ---
 # -------------------------------------------------------------
+
+# Example fallback (edit these paths if necessary)
+DATA_DIR = r"D:\Medi_Link\ml_model\training\data\disease_data"
+SAVE_MODEL_DIR = r"D:\Medi_Link\ml_model\saved-model"
+
 CANCER_DATA_PATH = os.path.join(DATA_DIR, 'cancer_disease.xlsx')
 
 try:
+    print(f"📂 Loading Cancer dataset from: {CANCER_DATA_PATH}")
     df = pd.read_excel(CANCER_DATA_PATH)
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
 
-    # Target: 'diagnosis' -> is_cancer
+    print(f"📋 Columns found: {list(df.columns)}")
+
+    # ✅ Step 1: Create binary target column (works with numeric or text)
     df['is_cancer'] = df['diagnosis'].apply(
-        lambda x: 0 if str(x).strip().lower() in ['none', 'no', 'not performed'] else 1
+        lambda x: 1 if str(x).strip().lower() in 
+        ['1', 'yes', 'cancer', 'malignant', 'positive', 'tumor', 'detected']
+        else 0
     )
 
-    X = df.drop(columns=['diagnosis', 'cancertype', 'is_cancer'])
-    y = df['is_cancer']
+    # ✅ Step 2: Check target balance
+    print("\n🎯 Target distribution:")
+    print(df['is_cancer'].value_counts())
 
-    numerical_features = [
-        'age', 'bmi', 'physicalactivity_hoursperweek', 'genomicmarker_1',
-        'genomicmarker_2', 'tumorsize_mm', 'bloodtest_markera', 'bloodtest_markerb',
-    ]
-    categorical_features = [
-        'gender', 'familyhistorycancer', 'smokingstatus', 'alcoholconsumption',
-        'biopsyresult', 'chronicdisease_hypertension', 'chronicdisease_diabetes',
-        'symptoms_fatigue', 'symptoms_unexplainedweightloss',
-    ]
+    if df['is_cancer'].nunique() < 2:
+        print("⚠️ Skipping Cancer model training: Only one class found in target column.")
+    else:
+        # ✅ Step 3: Feature selection
+        numerical_features = [
+            'age', 'bmi', 'physicalactivity_hoursperweek', 'genomicmarker_1',
+            'genomicmarker_2', 'tumorsize_mm', 'bloodtest_markera', 'bloodtest_markerb'
+        ]
+        categorical_features = [
+            'gender', 'familyhistorycancer', 'smokingstatus', 'alcoholconsumption',
+            'biopsyresult', 'chronicdisease_hypertension', 'chronicdisease_diabetes',
+            'symptoms_fatigue', 'symptoms_unexplainedweightloss'
+        ]
 
-    numerical_features = [f for f in numerical_features if f in X.columns]
-    categorical_features = [f for f in categorical_features if f in X.columns]
+        X = df.drop(columns=['diagnosis', 'cancertype', 'is_cancer'], errors='ignore')
+        y = df['is_cancer']
 
-    # Convert numerical and clean categorical
-    for col in numerical_features:
-        X[col] = pd.to_numeric(X[col], errors='coerce')
-    for col in categorical_features:
-        X[col] = X[col].astype(str).str.strip().str.lower()
+        numerical_features = [f for f in numerical_features if f in X.columns]
+        categorical_features = [f for f in categorical_features if f in X.columns]
 
-    # Preprocessing pipeline
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', Pipeline([
-                ('imputer', SimpleImputer(strategy='mean')),
-                ('scaler', StandardScaler())
-            ]), numerical_features),
-            ('cat', Pipeline([
-                ('imputer', SimpleImputer(strategy='most_frequent')),
-                ('onehot', OneHotEncoder(handle_unknown='ignore', drop='first', sparse_output=False))
-            ]), categorical_features)
-        ],
-        remainder='drop'
-    )
+        # ✅ Clean data
+        for col in numerical_features:
+            X[col] = pd.to_numeric(X[col], errors='coerce')
+        for col in categorical_features:
+            X[col] = X[col].astype(str).str.strip().str.lower()
 
-    # Create pipeline with XGBoost classifier
-    model_pipeline = Pipeline([
-        ('preprocessor', preprocessor),
-        ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))
-    ])
+        # ✅ Step 4: Preprocessor
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', Pipeline([
+                    ('imputer', SimpleImputer(strategy='mean')),
+                    ('scaler', StandardScaler())
+                ]), numerical_features),
+                ('cat', Pipeline([
+                    ('imputer', SimpleImputer(strategy='most_frequent')),
+                    ('onehot', OneHotEncoder(handle_unknown='ignore', drop='first', sparse_output=False))
+                ]), categorical_features)
+            ],
+            remainder='drop'
+        )
 
-    # Train with Hyperparameter Tuning
-    train_and_save_model(
-        "Cancer Disease", 
-        model_pipeline, 
-        X, 
-        y, 
-        SAVE_MODEL_DIR, 
-        use_tuning=True, 
-        tuning_params=XGB_PARAM_GRID
-    )
+        # ✅ Step 5: Model pipeline
+        model = XGBClassifier(
+            random_state=42,
+            use_label_encoder=False,
+            eval_metric='logloss'
+        )
+
+        # Split dataset for training and validation
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        print("\n🚀 Training preprocessor and model...")
+        X_train_preprocessed = preprocessor.fit_transform(X_train)
+        model.fit(X_train_preprocessed, y_train)
+
+        # ✅ Step 6: Save both model and preprocessor
+        os.makedirs(SAVE_MODEL_DIR, exist_ok=True)
+
+        model_path = os.path.join(SAVE_MODEL_DIR, "cancer_model.pkl")
+        preprocessor_path = os.path.join(SAVE_MODEL_DIR, "cancer_preprocessor.pkl")
+
+        with open(model_path, 'wb') as f:
+            pickle.dump(model, f)
+
+        with open(preprocessor_path, 'wb') as f:
+            pickle.dump(preprocessor, f)
+
+        print(f"✅ Model saved at: {model_path}")
+        print(f"✅ Preprocessor saved at: {preprocessor_path}")
 
 except FileNotFoundError:
     print(f"⚠️ Dataset file not found at {CANCER_DATA_PATH}. Skipping training.")
