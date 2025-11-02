@@ -9,13 +9,13 @@ const BACKEND_URL = 'http://localhost:5005';
 const getArrowIndicator = (riskLevel) => {
   switch (riskLevel) {
     case 'Low':
-      return '🟢🙂'; // Green circle happy face for low risk
+      return '🟢'; // Green circle happy face for low risk
     case 'Medium':
-      return '🟡😐'; // Yellow circle neutral face for medium risk
+      return '🟡'; // Yellow circle neutral face for medium risk
     case 'High':
-      return '🟠😟'; // Orange circle worried face for high risk
+      return '🟠'; // Orange circle worried face for high risk
     case 'Very High':
-      return '🔴😱'; // Red circle screaming face for very high high risk
+      return '🔴'; // Red circle screaming face for very high high risk
     default:
       return '';
   }
