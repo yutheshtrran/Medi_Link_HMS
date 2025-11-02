@@ -1,2 +1,4 @@
 **/.env*
 Backend/.env
+
+ml_model/training/data/images/
