@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppContext } from '../Context/AppContext'; // Assuming this path is correct
+import { AppContext } from '../Context/AppContext';
+import Upload_Report from '../Components/Upload_Report';
+ // Assuming this path is correct
 
 const Doctors = () => {
   const { speciality } = useParams(); // Get doctor speciality from URL param
@@ -51,8 +53,11 @@ const Doctors = () => {
   }, [doctors, speciality, searchTerm]); // Added searchTerm to dependencies
 
   return (
+
     <div className="p-4 sm:p-6 lg:p-8 font-inter">
       {/* Search Input Field */}
+
+      <Upload_Report/>
       <div className="mb-6">
         <input
           type="text"

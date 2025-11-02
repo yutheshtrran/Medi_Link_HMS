@@ -5,6 +5,7 @@ import pickle
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 # =====================
 # CONFIGURATION
@@ -12,6 +13,13 @@ from flask_cors import CORS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..'))
 sys.path.insert(0, PROJECT_ROOT)
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {'txt', 'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- ML Model Imports ---
 try:
@@ -100,6 +108,64 @@ def create_app():
             print(f"❌ Error generating Gemini response: {e}")
             fallback = intent_response if intent_response else "Sorry, I couldn't generate a response."
             return jsonify({'response': fallback}), 500
+
+    # =====================
+    # REPORT ANALYSIS ROUTE (TEXT)
+    # =====================
+    @app.route('/analyze-report', methods=['POST'])
+    def analyze_report():
+        data = request.get_json()
+        report_text = data.get('reportText', '').strip()
+
+        if not report_text:
+            return jsonify({"error": "No report text provided"}), 400
+
+        try:
+            summary = get_gemini_response(report_text)  # Your summarization logic
+            return jsonify({"summary": summary if summary else ""})
+        except Exception as e:
+            print(f"❌ Error processing report: {e}")
+            return jsonify({"summary": ""}), 500
+
+    # =====================
+    # REPORT ANALYSIS ROUTE (FILE UPLOAD)
+    # =====================
+    @app.route('/analyze-report-file', methods=['POST'])
+    def analyze_report_file():
+        if 'reportFile' not in request.files:
+            return jsonify({'error': 'No file part in request'}), 400
+
+        file = request.files['reportFile']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+
+            report_text = ''
+            try:
+                if filename.lower().endswith('.txt'):
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        report_text = f.read()
+                elif filename.lower().endswith('.pdf'):
+                    from PyPDF2 import PdfReader
+                    reader = PdfReader(file_path)
+                    report_text = '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
+            except Exception as e:
+                print(f"❌ Error extracting text: {e}")
+                return jsonify({'error': 'Failed to extract text from file'}), 500
+
+            # Generate summary using Gemini or local logic
+            try:
+                summary = get_gemini_response(report_text) if report_text else ''
+                return jsonify({'summary': summary})
+            except Exception as e:
+                print(f"❌ Error generating summary: {e}")
+                return jsonify({'summary': ''}), 500
+
+        return jsonify({'error': 'File type not allowed'}), 400
 
     # =====================
     # HEALTH CHECK ROUTE

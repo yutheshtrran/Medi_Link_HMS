@@ -9,7 +9,6 @@ import Day from '../Components/Day';
 import Loader from '../Components/Loader';
 import ChartNavigator from '../Components/ChartNavigator';
 
-
 const Home = () => {
   const [loading, setLoading] = useState(true);
 
