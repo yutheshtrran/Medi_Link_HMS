@@ -20,17 +20,12 @@ const parseBoldMarkers = (text) => {
   let match;
 
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
-    }
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
     parts.push(<span className="font-bold" key={lastIndex}>{match[1]}</span>);
     lastIndex = regex.lastIndex;
   }
 
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
   return parts;
 };
 
@@ -67,24 +62,26 @@ const highlightKeywords = (text) => {
   return segments;
 };
 
-// Generate patient-focused narrative with personalized greeting
+// ✅ Detect if text is health-related
+const isMedicalContent = (text) => {
+  const medicalKeywords = [
+    'diagnosis', 'treatment', 'disease', 'prescription', 'medicine', 'doctor',
+    'hospital', 'patient', 'cardiology', 'ECG', 'blood pressure', 'cholesterol',
+    'scan', 'MRI', 'symptom', 'injury', 'surgery', 'clinical', 'infection'
+  ];
+  const match = medicalKeywords.some(keyword =>
+    new RegExp(`\\b${keyword}\\b`, 'i').test(text)
+  );
+  return match;
+};
+
+// Generate patient-focused narrative
 const generatePatientNarrative = (summary, name) => {
   const greeting = name ? `Hi ${name}, here is a summary of your medical report:` : 'Here is a summary of your medical report:';
-
-  const lines = summary
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line);
-
-  // Replace patient's name with "you"
-  const replacedLines = lines.map(line => {
-    if (name) {
-      const regex = new RegExp(name, 'gi');
-      return line.replace(regex, 'you');
-    }
-    return line;
-  });
-
+  const lines = summary.split('\n').map(l => l.trim()).filter(Boolean);
+  const replacedLines = name
+    ? lines.map(line => line.replace(new RegExp(name, 'gi'), 'you'))
+    : lines;
   return [greeting, ...replacedLines].join('\n');
 };
 
@@ -126,9 +123,16 @@ const Upload_Report = () => {
         return;
       }
 
-      // Generate personalized narrative WITHOUT first-person prefixes
-      const patientNarrative = generatePatientNarrative(result.summary, result.name);
+      // ✅ Check for medical context
+      if (!isMedicalContent(result.summary)) {
+        setAnalysisResult({
+          text: "👋 I'm MedLink. I can only analyze health or medical-related documents. Please upload a valid medical report."
+        });
+        setIsLoading(false);
+        return;
+      }
 
+      const patientNarrative = generatePatientNarrative(result.summary, result.name);
       setAnalysisResult({ text: patientNarrative });
     } catch (err) {
       console.error('Error uploading file:', err);
@@ -139,25 +143,37 @@ const Upload_Report = () => {
   };
 
   const renderLineWithColors = (line, idx) => {
-    // Parse **bold** markers first
     const boldParts = parseBoldMarkers(line);
     const parts = [];
-
     boldParts.forEach((part) => {
-      if (typeof part === 'string') {
-        parts.push(...highlightKeywords(part));
-      } else {
-        parts.push(part);
-      }
+      if (typeof part === 'string') parts.push(...highlightKeywords(part));
+      else parts.push(part);
     });
-
     return <p key={idx} className="text-gray-700 leading-relaxed text-base mb-2">{parts}</p>;
   };
 
+  // ✅ Centered summary box
   const renderAnalysis = useMemo(() => {
     if (!analysisResult) return null;
-    const lines = analysisResult.text.split('\n').map(renderLineWithColors);
-    return <div className="p-4 bg-white rounded-xl shadow-inner mt-6 border border-gray-100">{lines}</div>;
+    const lines = analysisResult.text.split('\n').map(line => line.trim()).filter(line => line);
+    return (
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div className="bg-white border border-emerald-200 shadow-2xl rounded-2xl p-6 sm:p-8 w-full max-w-3xl max-h-[75vh] overflow-y-auto">
+          <h3 className="text-xl font-semibold text-emerald-700 mb-4 text-center">
+            🩺 Detailed Medical Report Summary
+          </h3>
+          {lines.map((line, idx) => renderLineWithColors(line, idx))}
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setAnalysisResult(null)}
+              className="px-6 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }, [analysisResult]);
 
   const BottomBar = () => (
@@ -173,7 +189,6 @@ const Upload_Report = () => {
   );
 
   const InputOverlay = () => (
-    // Note: The input overlay still needs a background to draw focus
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-[60] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all duration-300 ease-in-out">
         <div className="flex justify-between items-start mb-4">
@@ -191,12 +206,12 @@ const Upload_Report = () => {
         </div>
 
         <p className="text-sm text-gray-500 mb-4">
-          Please upload your medical report (PDF or TXT). The system will extract results and summarize disease-level insights.
+          Please upload your medical report (PDF, TXT, or Image). The system will extract and summarize health-related insights.
         </p>
 
         <input
           type="file"
-          accept=".txt,.pdf"
+          accept=".txt,.pdf,image/*"
           onChange={handleFileChange}
           className="w-full mb-4"
         />
@@ -227,37 +242,35 @@ const Upload_Report = () => {
   );
 
   if (!isAppOpen) {
-  return (
-    <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
-      <button
-        onClick={() => setIsAppOpen(true)}
-        style={{
-          backgroundColor: '#10B981', // emerald
-          color: 'white',
-          border: 'none',
-          borderRadius: '50%',
-          width: '65px',
-          height: '65px',
-          boxShadow: '0 0 20px rgba(16, 185, 129, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '2rem',
-          transition: 'all 0.3s ease-in-out',
-          animation: 'pulse-emerald 2s infinite'
-        }}
-        aria-label="Open Report Analyzer"
-      >
-        <Activity className="w-8 h-8" />
-      </button>
-    </div>
-  );
-
+    return (
+      <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
+        <button
+          onClick={() => setIsAppOpen(true)}
+          style={{
+            backgroundColor: '#10B981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '65px',
+            height: '65px',
+            boxShadow: '0 0 20px rgba(16, 185, 129, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2rem',
+            transition: 'all 0.3s ease-in-out',
+            animation: 'pulse-emerald 2s infinite'
+          }}
+          aria-label="Open Report Analyzer"
+        >
+          <Activity className="w-8 h-8" />
+        </button>
+      </div>
+    );
   }
 
   return (
-    // **KEY CHANGE**: Changed background to fully transparent (bg-transparent) and applied backdrop-blur-xl
     <div className="fixed inset-0 bg-transparent backdrop-blur-xl overflow-y-auto font-['Inter'] z-40">
       <div className="max-w-4xl mx-auto p-4 sm:p-8 pb-24 bg-white min-h-full shadow-2xl rounded-lg">
         <header className="text-center mb-10 relative">

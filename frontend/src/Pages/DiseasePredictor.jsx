@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Upload_Report from '../Components/Upload_Report';
 
 // --- Configuration for your Flask Backend ---
 const BACKEND_URL = 'http://localhost:5005'; 
@@ -1029,32 +1030,34 @@ Reasoning: ${result.message}
         {/* Image Upload Section */}
         {selectedDisease.supportsImage && (
           <div className="mt-8 border-t border-teal-300 pt-6">
-            <h3 className="text-xl font-bold text-teal-800 mb-4 text-center">Or Analyze a Medical Report</h3>
+            <h3 className="text-xl font-bold text-teal-800 mb-4 text-center"></h3>
             <div className="flex flex-col space-y-4">
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleImageChange}
-                className="block w-full text-base text-teal-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-teal-100 file:text-teal-700 hover:file:bg-teal-200 cursor-pointer"
-              />
-              {imageFile && (
-                <p className="text-sm text-teal-600 italic mt-1 text-center">
-                  File selected: **{imageFile.name}**
-                </p>
-              )}
-
-
-              <button
-                type="button"
-                onClick={analyzeImageWithBackend}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-xl font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200 ease-in-out transform hover:scale-[1.01]"
-                disabled={isLoading || !imageFile}
-              >
-                {isImagePredicting ? 'Analyzing Report with AI...' : 'Analyze Report (Image/PDF)'}
-              </button>
+             
             </div>
           </div>
         )}
+<h1
+  className="fixed bottom-25 right-4 text-sm text-emerald-600 font-medium animate-pulse-glow"
+>
+  💡 Tip: you can upload report directly.
+</h1>
+
+<style jsx>{`
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 0.6;
+      text-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+    }
+    50% {
+      opacity: 1;
+      text-shadow: 0 0 16px rgba(16, 185, 129, 1);
+    }
+  }
+  .animate-pulse-glow {
+    animation: pulseGlow 2s infinite ease-in-out;
+  }
+`}</style>
+     <Upload_Report/>
 
 
         {/* Prediction Results Display */}

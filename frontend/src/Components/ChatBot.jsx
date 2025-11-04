@@ -303,7 +303,7 @@ function Chatbot() {
             }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <BotAvatarSVG />
-                <div style={{ fontSize: '1.31rem', fontWeight: 600 }}>ChatBot</div>
+                <div style={{ fontSize: '1.31rem', fontWeight: 600 }}>Medi-Link Bot</div>
               </div>
               <button onClick={() => setShowChatbot(false)} style={{
                 border: 'none', color: '#fff', fontSize: '1.9rem', background: 'none', cursor: 'pointer'

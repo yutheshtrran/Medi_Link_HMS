@@ -6,6 +6,8 @@ import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from PIL import Image
+import pytesseract
 
 # =====================
 # CONFIGURATION
@@ -16,18 +18,14 @@ sys.path.insert(0, PROJECT_ROOT)
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-ALLOWED_EXTENSIONS = {'txt', 'pdf'}
+
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'jpg', 'jpeg', 'png'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --- ML Model Imports ---
-try:
-    from ml_model.inference.image_predict import predict_disease_from_image
-    print("✅ Successfully imported predict_disease_from_image.")
-except ImportError as e:
-    print(f"⚠️ Could not import image_predict: {e}")
 
+# --- ML Model Imports ---
 try:
     from ml_model.inference.gemini_response import get_gemini_response
     print("✅ Successfully imported Gemini response helper.")
@@ -46,6 +44,7 @@ from Backend.tabular_routes.liver_disease import liver_bp
 from Backend.tabular_routes.thyroid import thyroid_bp
 from Backend.Routes.report_ocr_route import report_bp
 from Backend.tabular_routes.cancer import cancer_bp
+
 
 # =====================
 # FLASK APP CREATION
@@ -88,11 +87,9 @@ def create_app():
 
         intent_response = None
 
-        # Step 1: Try local chatbot first
         try:
             X = text_vectorizer.transform([message])
             prediction_tag = text_chatbot_model.predict(X)[0]
-
             for intent in text_intents.get('intents', []):
                 if intent['tag'] == prediction_tag:
                     intent_response = random.choice(intent['responses'])
@@ -100,7 +97,6 @@ def create_app():
         except Exception as e:
             print(f"⚠️ Local model error: {e}")
 
-        # Step 2: Use Gemini to enhance or generate if needed
         try:
             reply = get_gemini_response(message, intent_response=intent_response)
             return jsonify({'response': reply})
@@ -121,7 +117,7 @@ def create_app():
             return jsonify({"error": "No report text provided"}), 400
 
         try:
-            summary = get_gemini_response(report_text)  # Your summarization logic
+            summary = get_gemini_response(report_text)
             return jsonify({"summary": summary if summary else ""})
         except Exception as e:
             print(f"❌ Error processing report: {e}")
@@ -139,33 +135,62 @@ def create_app():
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(file_path)
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'File type not allowed'}), 400
 
-            report_text = ''
-            try:
-                if filename.lower().endswith('.txt'):
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        report_text = f.read()
-                elif filename.lower().endswith('.pdf'):
-                    from PyPDF2 import PdfReader
-                    reader = PdfReader(file_path)
-                    report_text = '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
-            except Exception as e:
-                print(f"❌ Error extracting text: {e}")
-                return jsonify({'error': 'Failed to extract text from file'}), 500
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
 
-            # Generate summary using Gemini or local logic
-            try:
-                summary = get_gemini_response(report_text) if report_text else ''
-                return jsonify({'summary': summary})
-            except Exception as e:
-                print(f"❌ Error generating summary: {e}")
-                return jsonify({'summary': ''}), 500
+        report_text = ''
+        try:
+            ext = filename.lower().split('.')[-1]
+            if ext == 'txt':
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    report_text = f.read()
+            elif ext == 'pdf':
+                from PyPDF2 import PdfReader
+                reader = PdfReader(file_path)
+                report_text = '\n'.join([page.extract_text() or '' for page in reader.pages])
+            elif ext in {'jpg', 'jpeg', 'png'}:
+                img = Image.open(file_path)
+                report_text = pytesseract.image_to_string(img)
+        except Exception as e:
+            print(f"❌ Error extracting text: {e}")
+            return jsonify({'error': 'Failed to extract text from file'}), 500
 
-        return jsonify({'error': 'File type not allowed'}), 400
+        if not report_text.strip():
+            return jsonify({'summary': "👋 I’m MedLink — I couldn’t read text from your file."})
+
+        # =====================
+        # MEDICAL CONTENT CHECK
+        # =====================
+        MEDICAL_KEYWORDS = [
+            "diagnosis", "treatment", "surgery", "blood", "patient", "hospital",
+            "scan", "ECG", "ICU", "symptom", "disease", "medicine", "injury",
+            "fracture", "wound", "infection", "doctor", "report", "therapy",
+            "clinical", "pressure", "sugar", "cholesterol", "operation", "x-ray"
+        ]
+
+        medical_hits = sum(word.lower() in report_text.lower() for word in MEDICAL_KEYWORDS)
+        hospital_terms = ["ward", "consultant", "discharge", "BHT", "admission", "medical", "surgical"]
+        hospital_hits = sum(t.lower() in report_text.lower() for t in hospital_terms)
+
+        if medical_hits + hospital_hits < 2:
+            return jsonify({
+                "summary": "👋 I'm MedLink. I can only analyze health or medical-related reports. "
+                           "Please upload a valid medical report."
+            })
+
+        # =====================
+        # SUMMARIZATION
+        # =====================
+        try:
+            summary = get_gemini_response(report_text) if report_text else ''
+            return jsonify({'summary': summary})
+        except Exception as e:
+            print(f"❌ Error generating summary: {e}")
+            return jsonify({'summary': ''}), 500
 
     # =====================
     # HEALTH CHECK ROUTE
@@ -190,6 +215,7 @@ def create_app():
     app.register_blueprint(health_calc_bp)
 
     return app
+
 
 # =====================
 # MAIN ENTRY POINT
