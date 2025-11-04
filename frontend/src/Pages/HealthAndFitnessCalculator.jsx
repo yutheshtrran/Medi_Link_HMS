@@ -185,7 +185,7 @@ const HealthAndFitnessCalculator = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.heading}>📈 Health & Fitness Calculator</h2>
+        <h2 style={styles.heading}>Health & Fitness Calculator</h2>
         <form onSubmit={handleSubmit}>
           
           <div style={styles.formGrid}>
