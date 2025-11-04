@@ -241,28 +241,23 @@ function Chatbot() {
     <>
       {/* 🔹 Bouncing Dot Animation CSS */}
       <style>{`
-        .bot-thinking-dot {
-          height: 7px;
-          width: 7px;
-          border-radius: 50%;
-          background-color: #008080;
-          opacity: 0.8;
-          animation: bounce 1.4s infinite ease-in-out;
-        }
-        .bot-thinking-dot:nth-child(1) { animation-delay: 0s; }
-        .bot-thinking-dot:nth-child(2) { animation-delay: 0.2s; }
-        .bot-thinking-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-          0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-8px); }
-        }
-        /* Glow animation for minimized button */
-        @keyframes pulse-teal {
-            0% { box-shadow: 0 0 0 0 rgba(0, 128, 128, 0.7); }
-            70% { box-shadow: 0 0 0 18px rgba(0, 128, 128, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 128, 128, 0); }
-        }
-      `}</style>
+  .bot-thinking-dot {
+    height: 7px;
+    width: 7px;
+    border-radius: 50%;
+    background-color: #008080;
+    opacity: 0.8;
+    animation: bounce 1.4s infinite ease-in-out;
+  }
+  .bot-thinking-dot:nth-child(1) { animation-delay: 0s; }
+  .bot-thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+  .bot-thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+  }
+`}</style>
 
       <div style={{ boxSizing: 'border-box', fontFamily: '"Inter", sans-serif' }}>
         {!showChatbot && (
