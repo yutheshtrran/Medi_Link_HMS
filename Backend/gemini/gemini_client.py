@@ -3,13 +3,6 @@ import json
 import google.generativeai as genai
 import numpy as np # Import numpy for potential NaN or inf handling in mock response
 
-# --- IMPORTANT: Configure your Gemini API Key ---
-# It's highly recommended to set this as an environment variable:
-# For Linux/macOS: export GEMINI_API_KEY="YOUR_API_KEY_HERE"
-# For Windows (Command Prompt): set GEMINI_API_KEY="YOUR_API_KEY_HERE"
-# For Windows (PowerShell): $env:GEMINI_API_KEY="YOUR_API_KEY_HERE"
-# Or you can set it directly here for testing, but AVOID in production:
-# os.environ["GEMINI_API_KEY"] = "YOUR_API_KEY_HERE" # <-- Replace with actual key or rely on env var
 
 def call_gemini_api(extracted_text, disease_id):
     """
