@@ -243,30 +243,54 @@ const Upload_Report = () => {
 
   if (!isAppOpen) {
     return (
-      <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
-        <button
-          onClick={() => setIsAppOpen(true)}
-          style={{
-            backgroundColor: '#10B981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            width: '65px',
-            height: '65px',
-            boxShadow: '0 0 20px rgba(16, 185, 129, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '2rem',
-            transition: 'all 0.3s ease-in-out',
-            animation: 'pulse-emerald 2s infinite'
-          }}
-          aria-label="Open Report Analyzer"
-        >
-          <Activity className="w-8 h-8" />
-        </button>
-      </div>
+      <>
+        <style>
+          {`
+            @keyframes pulse-emerald {
+              0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6),
+                            0 0 15px rgba(16, 185, 129, 0.8);
+                transform: scale(1);
+              }
+              50% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.1),
+                            0 0 25px rgba(16, 185, 129, 0.6);
+                transform: scale(1.05);
+              }
+              100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0),
+                            0 0 10px rgba(16, 185, 129, 0.5);
+                transform: scale(1);
+              }
+            }
+          `}
+        </style>
+
+        <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
+          <button
+            onClick={() => setIsAppOpen(true)}
+            style={{
+              backgroundColor: '#10B981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '65px',
+              height: '65px',
+              boxShadow: '0 0 20px rgba(16, 185, 129, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '2rem',
+              transition: 'all 0.3s ease-in-out',
+              animation: 'pulse-emerald 2s infinite'
+            }}
+            aria-label="Open Report Analyzer"
+          >
+            <Activity className="w-8 h-8" />
+          </button>
+        </div>
+      </>
     );
   }
 

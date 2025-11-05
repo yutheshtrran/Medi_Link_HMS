@@ -1037,9 +1037,9 @@ Reasoning: ${result.message}
           </div>
         )}
 <h1
-  className="fixed bottom-25 right-4 text-sm text-emerald-600 font-medium animate-pulse-glow"
+  className="fixed bottom-30 right-4 text-sm text-emerald-600 font-medium animate-pulse-glow"
 >
-  💡 Tip: you can upload report directly.
+  💡 Tip: you can upload your report directly.
 </h1>
 
 <style jsx>{`

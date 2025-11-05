@@ -4,6 +4,24 @@ import { RefreshCw, FileText, Activity, X, Upload } from 'lucide-react';
 const FLASK_API_URL = 'http://localhost:5005/analyze-report-file';
 const GEMINI_URL = 'https://gemini.example.com';
 
+/* ✅ Added animation for glowing emerald pulse */
+const style = `
+@keyframes pulse-emerald {
+  0% {
+    box-shadow: 0 0 0 0 rgba(4, 120, 87, 0.6), 0 0 15px rgba(4, 120, 87, 0.8);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(4, 120, 87, 0.1), 0 0 25px rgba(4, 120, 87, 0.6);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(4, 120, 87, 0), 0 0 10px rgba(4, 120, 87, 0.5);
+    transform: scale(1);
+  }
+}
+`;
+
 const COLOR_CATEGORIES = {
   medicines: {
     keywords: ['antidiabetic', 'insulin', 'statin', 'aspirin', 'antibiotic', 'antihypertensive', 'analgesic'],
@@ -83,7 +101,7 @@ const generateDoctorNarrative = (summary, name = '') => {
   const cleanSummary = summary
     .split('\n')
     .filter(line => !line.trim().startsWith('#'))
-    .filter(line => !/best to discuss your results with your doctor/i.test(line)) // remove "discuss with doctor" lines
+    .filter(line => !/best to discuss your results with your doctor/i.test(line))
     .map(line =>
       line
         .replace(/Dr\..*/gi, '')
@@ -279,77 +297,80 @@ const Doctor_Report_Float = () => {
     </div>
   );
 
-  if (!isAppOpen) {
-    return (
-      <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
-        <button
-          onClick={() => setIsAppOpen(true)}
-          style={{
-            backgroundColor: '#047857',
-            color: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            width: '65px',
-            height: '65px',
-            boxShadow: '0 0 20px rgba(4, 120, 87, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '2rem',
-            transition: 'all 0.3s ease-in-out',
-            animation: 'pulse-emerald 2s infinite'
-          }}
-          aria-label="Open Doctor Analyzer"
-        >
-          <FileText className="w-8 h-8" />
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-transparent backdrop-blur-xl overflow-y-auto font-['Inter'] z-40">
-      <div className="max-w-4xl mx-auto p-4 sm:p-8 pb-24 bg-white min-h-full shadow-2xl rounded-lg">
-        <header className="text-center mb-10 relative">
-          <button
-            onClick={() => setIsAppOpen(false)}
-            className="absolute top-0 right-0 p-2 rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition"
-            aria-label="Minimize"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <h1 className="text-4xl font-extrabold text-emerald-800 tracking-tight mb-2">
-            <Activity className="inline-block w-8 h-8 mr-2 text-emerald-600" />
-            Doctor Report Analyzer
-          </h1>
-          <p className="text-gray-500 text-xl">
-            Upload patient reports and view summarized insights instantly.
-          </p>
-        </header>
+    <>
+      {/* ✅ Inject pulse animation */}
+      <style>{style}</style>
 
-        {(analysisResult || isLoading) && (
-          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl border border-emerald-200">
-            {isLoading && (
-              <div className="flex items-center justify-center p-10 text-emerald-600">
-                <RefreshCw className="w-6 h-6 mr-3 animate-spin" />
-                Analyzing report...
+      {!isAppOpen ? (
+        <div style={{ position: 'fixed', bottom: '25px', right: '25px', zIndex: 1000 }}>
+          <button
+            onClick={() => setIsAppOpen(true)}
+            style={{
+              backgroundColor: '#047857',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '65px',
+              height: '65px',
+              boxShadow: '0 0 20px rgba(4, 120, 87, 0.5), 0 6px 12px rgba(0,0,0,0.25)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '2rem',
+              transition: 'all 0.3s ease-in-out',
+              animation: 'pulse-emerald 2s infinite' // ✅ glowing animation
+            }}
+            aria-label="Open Doctor Analyzer"
+          >
+            <FileText className="w-8 h-8" />
+          </button>
+        </div>
+      ) : (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-xl overflow-y-auto font-['Inter'] z-40">
+          <div className="max-w-4xl mx-auto p-4 sm:p-8 pb-24 bg-white min-h-full shadow-2xl rounded-lg">
+            <header className="text-center mb-10 relative">
+              <button
+                onClick={() => setIsAppOpen(false)}
+                className="absolute top-0 right-0 p-2 rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition"
+                aria-label="Minimize"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <h1 className="text-4xl font-extrabold text-emerald-800 tracking-tight mb-2">
+                <Activity className="inline-block w-8 h-8 mr-2 text-emerald-600" />
+                Doctor Report Analyzer
+              </h1>
+              <p className="text-gray-500 text-xl">
+                Upload patient reports and view summarized insights instantly.
+              </p>
+            </header>
+
+            {(analysisResult || isLoading) && (
+              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl border border-emerald-200">
+                {isLoading && (
+                  <div className="flex items-center justify-center p-10 text-emerald-600">
+                    <RefreshCw className="w-6 h-6 mr-3 animate-spin" />
+                    Analyzing report...
+                  </div>
+                )}
+                {!isLoading && analysisResult && renderAnalysis}
               </div>
             )}
-            {!isLoading && analysisResult && renderAnalysis}
-          </div>
-        )}
 
-        {!analysisResult && !isLoading && (
-          <div className="text-center p-12 bg-white rounded-2xl shadow-md border border-gray-200 text-gray-500">
-            <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg font-medium">No report analyzed yet. Click below to upload one.</p>
+            {!analysisResult && !isLoading && (
+              <div className="text-center p-12 bg-white rounded-2xl shadow-md border border-gray-200 text-gray-500">
+                <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No report analyzed yet. Click below to upload one.</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {isExpanded ? <InputOverlay /> : <BottomBar />}
-    </div>
+          {isExpanded ? <InputOverlay /> : <BottomBar />}
+        </div>
+      )}
+    </>
   );
 };
 
