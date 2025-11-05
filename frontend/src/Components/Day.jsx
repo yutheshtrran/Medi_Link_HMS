@@ -319,7 +319,7 @@ const Day = () => {
           onClick={() => setIsAppMinimized(false)}
           className="fixed left-4 bottom-4 md:bottom-auto md:top-1/2 -translate-y-1/2 bg-[#159A7D] text-white p-5 rounded-full shadow-2xl ring-4 ring-white hover:shadow-3xl transform hover:scale-105 transition-all duration-300 z-50"
         >
-          <Maximize2 className="w-6 h-6" />
+          <CalendarIcon className="w-6 h-6" />
         </button>
       )}
     </div>
