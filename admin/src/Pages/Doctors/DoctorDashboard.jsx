@@ -3,6 +3,7 @@ import { DoctorContext } from "../../Context/DoctorContext";
 import { assets } from "../../assets/assets";
 import { AppContext } from "../../Context/AppContext";
 import Loader from "../../Components/Loader"; // Import the Loader component
+import Upload_Report from "../../Components/Upload_Report";
 
 const DoctorDashboard = () => {
   const {
@@ -87,6 +88,8 @@ const DoctorDashboard = () => {
             </div>
           ))}
         </div>
+
+         <Upload_Report />
 
         {/* Latest Appointments */}
         <div className="bg-white">
