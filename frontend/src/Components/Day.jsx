@@ -1,66 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { AppContext } from '../Context/AppContext.jsx';
+import { toast } from 'react-toastify';
 
-// Main App component that combines the DigitalTime and Calendar
+// ======================
+// MAIN WRAPPER COMPONENT
+// ======================
 const Day = () => {
-  const [isAppMinimized, setIsAppMinimized] = useState(true); // Change this from false to true
+  const [isAppMinimized, setIsAppMinimized] = useState(true);
 
   return (
     <>
-      {/* The main container for the app, acting as a fixed window */}
-      <div className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                    w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-w-4xl
-                    p-4 font-inter z-40 rounded-2xl shadow-2xl
-                    transition-all duration-500 ease-in-out
-                    ${isAppMinimized ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 pointer-events-auto scale-100'}
-                    bg-white bg-opacity-62` /* Apply transparency to the window background */}>
-
-        {/* Centralized Minimize Button for the entire app */}
+      <div
+        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+        w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-w-4xl
+        p-4 font-inter z-40 rounded-2xl shadow-2xl
+        transition-all duration-500 ease-in-out
+        ${isAppMinimized ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100 pointer-events-auto scale-100'}
+        bg-white bg-opacity-70`}
+      >
+        {/* Minimize Button */}
         <button
-          onClick={() => setIsAppMinimized(true)} // This button only minimizes
+          onClick={() => setIsAppMinimized(true)}
           className="absolute top-4 right-4 p-2 text-black hover:text-gray-700 focus:outline-none transition-transform duration-300 z-50 rounded-full bg-gray-200 hover:bg-gray-300 shadow-md"
-          aria-label="Minimize app"
         >
-          <svg
-            className="w-6 h-6 transform rotate-0" // Always a 'V' pointing down to minimize
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
 
-        {/* Render time and calendar when not minimized */}
+        {/* Content */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
-          {/* Digital Time Component */}
           <div className="p-6 rounded-xl flex-1 w-full md:w-auto">
             <DigitalTime />
           </div>
-          {/* Calendar Component */}
           <div className="p-6 rounded-xl flex-1 w-full md:w-auto">
             <Calendar />
           </div>
         </div>
       </div>
 
-      {/* Render a small restore icon when minimized */}
+      {/* Restore Button */}
       {isAppMinimized && (
         <button
-          onClick={() => setIsAppMinimized(false)} // This button only maximizes
-          className="fixed left-4 top-1/2 -translate-y-1/2 bg-[#159A7D] text-white p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#159A7D] focus:ring-opacity-50 z-50"
-          aria-label="Restore app"
-          title="Restore App"
+          onClick={() => setIsAppMinimized(false)}
+          className="fixed left-4 top-1/2 -translate-y-1/2 bg-[#159A7D] text-white p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 z-50"
         >
-          {/* Calendar Icon */}
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </button>
       )}
@@ -68,32 +55,21 @@ const Day = () => {
   );
 };
 
-// DigitalTime Component: Displays the current time
+// ======================
+// DIGITAL CLOCK
+// ======================
 const DigitalTime = () => {
   const [time, setTime] = useState(new Date());
-
   useEffect(() => {
-    const timerId = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timerId);
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
-
   const formatTime = (date) => {
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    let seconds = date.getSeconds();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-
-    return `${hours}:${minutes}:${seconds} ${ampm}`;
+    let h = date.getHours(), m = date.getMinutes(), s = date.getSeconds();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ${ampm}`;
   };
-
   return (
     <div className="text-center">
       <div className="text-5xl md:text-6xl font-bold text-[#159A7D] tracking-wide">
@@ -103,187 +79,116 @@ const DigitalTime = () => {
   );
 };
 
-// Calendar Component: Displays the current month's calendar and integrates Gemini API for event ideas
+// ======================
+// CALENDAR COMPONENT
+// ======================
 const Calendar = () => {
+  const { backendUrl, token } = useContext(AppContext);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [eventIdeas, setEventIdeas] = useState(''); // Stores raw LLM response (bulleted list)
-  const [isLoadingIdeas, setIsLoadingIdeas] = useState(false); // Loading for ideas
-  const [errorIdeas, setErrorIdeas] = useState(null); // Error for ideas
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedEventIdea, setSelectedEventIdea] = useState(null); // Stores the specific idea chosen for planning
-  const [detailedPlan, setDetailedPlan] = useState(''); // Stores the detailed plan from LLM
-  const [isLoadingPlan, setIsLoadingPlan] = useState(false); // Loading for plan
-  const [errorPlan, setErrorPlan] = useState(null); // Error for plan
-
-
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year, month) => {
-    return new Date(year, month, 1).getDay();
-  };
-
-  const handleDateSelect = (day) => {
-    const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    setSelectedDate(newSelectedDate);
-    setEventIdeas(''); // Clear previous ideas
-    setErrorIdeas(null); // Clear previous errors
-    setSelectedEventIdea(null); // Clear selected idea
-    setDetailedPlan(''); // Clear previous plan
-    setErrorPlan(null); // Clear previous plan error
-  };
-
-  // Function to call the Gemini API for event ideas
-  const getGeminiEventIdeas = async () => {
-    if (!selectedDate) {
-      setErrorIdeas("Please select a date first!");
-      return;
-    }
-
-    setIsLoadingIdeas(true);
-    setEventIdeas('');
-    setErrorIdeas(null);
-    setSelectedEventIdea(null); // Reset selected idea on new idea generation
-    setDetailedPlan(''); // Reset detailed plan
-    setErrorPlan(null); // Reset plan error
-
-    const prompt = `Suggest 3-5 creative and fun event ideas for ${selectedDate.toDateString()}. Consider various types of activities (indoor, outdoor, relaxing, active). Format them as a bulleted list.`;
-
-    let chatHistory = [];
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-    const payload = { contents: chatHistory };
-    const apiKey = "";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+  // ----------------------
+  // Fetch appointments
+  // ----------------------
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (!token) return;
+      try {
+        setLoading(true);
+        const { data } = await axios.get(`${backendUrl}/api/user/appointments`, {
+          headers: { token },
+        });
+        if (data.success) {
+          const formatted = data.appointments.map((item) => {
+            const [day, month, year] = item.slotDate.split('_').map(Number);
+            const date = new Date(year, month - 1, day);
+            return {
+              date: date.toISOString().split('T')[0],
+              doctor: item.docData.name,
+              specialty: item.docData.speciality,
+              address: `${item.docData.address.line1}, ${item.docData.address.line2}`,
+              time: item.slotTime,
+              cancelled: item.cancelled,
+            };
+          });
+          setAppointments(formatted);
+        } else {
+          toast.error(data.message || 'Failed to load appointments');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to load appointments');
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchAppointments();
+  }, [backendUrl, token]);
 
-      const result = await response.json();
+  // ----------------------
+  // Calendar generation
+  // ----------------------
+  const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const getFirstDayOfMonth = (y, m) => new Date(y, m, 1).getDay();
 
-      if (result.candidates && result.candidates.length > 0 &&
-          result.candidates[0].content && result.candidates[0].content.parts &&
-          result.candidates[0].content.parts.length > 0) {
-        const text = result.candidates[0].content.parts[0].text;
-        setEventIdeas(text);
-      } else {
-        setErrorIdeas("Could not generate event ideas. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error calling Gemini API for ideas:", err);
-      setErrorIdeas(`Failed to fetch event ideas: ${err.message}`);
-    } finally {
-      setIsLoadingIdeas(false);
-    }
-  };
-
-  // Function to call the Gemini API for a detailed plan for a selected event idea
-  const getGeminiDetailedPlan = async () => {
-    if (!selectedEventIdea) {
-      setErrorPlan("Please select an event idea to plan first!");
-      return;
-    }
-
-    setIsLoadingPlan(true);
-    setDetailedPlan('');
-    setErrorPlan(null);
-
-    const prompt = `Create a detailed plan for the event: "${selectedEventIdea}". Include a few key steps, any necessary items or preparations, and a rough time estimate for each step. Format it as a clear, easy-to-read list or short paragraphs.`;
-
-    let chatHistory = [];
-    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-    const payload = { contents: chatHistory };
-    const apiKey = "";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      if (result.candidates && result.candidates.length > 0 &&
-          result.candidates[0].content && result.candidates[0].content.parts &&
-          result.candidates[0].content.parts.length > 0) {
-        const text = result.candidates[0].content.parts[0].text;
-        setDetailedPlan(text);
-      } else {
-        setErrorPlan("Could not generate detailed plan. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error calling Gemini API for plan:", err);
-      setErrorPlan(`Failed to fetch detailed plan: ${err.message}`);
-    } finally {
-      setIsLoadingPlan(false);
-    }
-  };
-
-  // Function to render the calendar grid
   const renderCalendar = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    const y = currentDate.getFullYear();
+    const m = currentDate.getMonth();
     const today = new Date();
-    const todayDay = today.getDate();
-    const todayMonth = today.getMonth();
-    const todayYear = today.getFullYear();
+    const days = getDaysInMonth(y, m);
+    const firstDay = getFirstDayOfMonth(y, m);
+    const cells = [];
 
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDayIndex = getFirstDayOfMonth(year, month);
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    weekDays.forEach((d) =>
+      cells.push(<div key={d} className="font-bold text-gray-700 text-center">{d}</div>)
+    );
 
-    const calendarCells = [];
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    for (let i = 0; i < firstDay; i++) cells.push(<div key={`empty-${i}`}></div>);
 
-    weekdays.forEach(day => {
-      calendarCells.push(
-        <div key={day} className="font-bold text-gray-700 p-2 text-center border-b border-gray-200">
-          {day}
-        </div>
-      );
-    });
-
-    for (let i = 0; i < firstDayIndex; i++) {
-      calendarCells.push(<div key={`empty-${i}`} className="p-2"></div>);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isToday = day === todayDay && month === todayMonth && year === todayYear;
-      const isSelected = selectedDate &&
-                           day === selectedDate.getDate() &&
-                           month === selectedDate.getMonth() &&
-                           year === selectedDate.getFullYear();
-
-      calendarCells.push(
+    for (let day = 1; day <= days; day++) {
+      const dateObj = new Date(y, m, day);
+      const dateStr = dateObj.toISOString().split('T')[0];
+      const appt = appointments.find((a) => a.date === dateStr);
+      let bg = '';
+      if (appt) {
+        if (appt.cancelled) {
+          bg = 'bg-gray-400 text-white';
+        } else {
+          const diff = Math.ceil((dateObj - today) / (1000 * 60 * 60 * 24));
+          if (diff <= 0) bg = 'bg-red-500 text-white';
+          else if (diff <= 3) bg = 'bg-orange-400 text-white';
+          else bg = 'bg-green-400 text-white';
+        }
+      }
+      cells.push(
         <div
-          key={`day-${day}`}
-          className={`p-2 text-center rounded-md transition-colors duration-200 cursor-pointer
-            ${isToday ? 'bg-[#E0F2EF] text-[#0F6F57] font-semibold shadow-inner' : ''}
-            ${isSelected ? 'bg-purple-200 text-purple-800 font-bold border-2 border-purple-500' : 'hover:bg-gray-50'}`}
-          onClick={() => handleDateSelect(day)}
+          key={day}
+          className={`relative group text-center p-2 rounded-md cursor-pointer ${bg} hover:scale-105 transition-all`}
         >
           {day}
+          {appt && (
+            <div
+              className="absolute opacity-0 group-hover:opacity-100 transform group-hover:-translate-y-1 transition-all duration-300
+              top-10 left-1/2 -translate-x-1/2 w-64 
+              bg-white/95 backdrop-blur-md text-gray-900 text-xs rounded-xl shadow-2xl border border-gray-300 p-3 z-[100]
+              pointer-events-none"
+              style={{
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+              }}
+            >
+              <p className="font-semibold text-[#159A7D]">{appt.doctor}</p>
+              <p className="text-gray-600">{appt.specialty}</p>
+              <p className="mt-1 font-medium">{appt.time}</p>
+              <p className="text-gray-500">{appt.address}</p>
+              {appt.cancelled && <p className="text-red-500 mt-1 font-semibold">Cancelled</p>}
+            </div>
+          )}
         </div>
       );
     }
-
-    return calendarCells;
+    return cells;
   };
 
   return (
@@ -291,74 +196,10 @@ const Calendar = () => {
       <div className="bg-[#159A7D] text-white p-4 rounded-t-lg text-xl font-bold mb-4 shadow-md">
         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
       </div>
-      <div className="grid grid-cols-7 gap-1 text-sm">
-        {renderCalendar()}
-      </div>
-
-      {selectedDate && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner">
-          <p className="text-lg font-medium text-gray-700 mb-3">
-            Selected Date: <span className="font-bold text-[#159A7D]">{selectedDate.toDateString()}</span>
-          </p>
-          <button
-            onClick={getGeminiEventIdeas}
-            className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-            disabled={isLoadingIdeas}
-          >
-            {isLoadingIdeas ? 'Generating Ideas...' : '✨ Get Event Ideas ✨'}
-          </button>
-
-          {errorIdeas && (
-            <p className="text-red-600 mt-4 text-sm">{errorIdeas}</p>
-          )}
-
-          {eventIdeas && (
-            <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg text-left">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Event Ideas:</h3>
-              <div className="prose prose-sm max-w-none">
-                {/* Split ideas by newline and render each as selectable */}
-                {eventIdeas.split('\n').filter(line => line.trim() !== '').map((idea, index) => (
-                  <div key={index} className="flex items-center justify-between py-1 border-b border-gray-100 last:border-b-0">
-                    <p className="text-gray-700">{idea}</p>
-                    <button
-                      onClick={() => setSelectedEventIdea(idea.replace(/^- /, '').trim())} // Clean idea for selection
-                      className={`ml-2 px-3 py-1 text-xs rounded-full transition-colors duration-200
-                        ${selectedEventIdea === idea.replace(/^- /, '').trim() ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
-                      {selectedEventIdea === idea.replace(/^- /, '').trim() ? 'Selected' : 'Select'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedEventIdea && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner">
-              <p className="text-lg font-medium text-gray-700 mb-3">
-                Selected Event: <span className="font-bold text-purple-600">{selectedEventIdea}</span>
-              </p>
-              <button
-                onClick={getGeminiDetailedPlan}
-                className="bg-gradient-to-r from-teal-500 to-green-600 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
-                disabled={isLoadingPlan}
-              >
-                {isLoadingPlan ? 'Generating Plan...' : '✨ Get Detailed Plan ✨'}
-              </button>
-
-              {errorPlan && (
-                <p className="text-red-600 mt-4 text-sm">{errorPlan}</p>
-              )}
-
-              {detailedPlan && (
-                <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg text-left">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Detailed Plan:</h3>
-                  <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: detailedPlan.replace(/\n/g, '<br/>') }} />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      {loading ? (
+        <p className="text-gray-500">Loading appointments...</p>
+      ) : (
+        <div className="grid grid-cols-7 gap-1 text-sm">{renderCalendar()}</div>
       )}
     </div>
   );
