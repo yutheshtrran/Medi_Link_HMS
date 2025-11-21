@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { DoctorContext } from "../../Context/DoctorContext";
-import { assets } from "../../assets/assets";
 import { AppContext } from "../../Context/AppContext";
-import Loader from "../../Components/Loader"; // Import the Loader component
-import Upload_Report from "../../Components/Upload_Report";
+import { assets } from "../../assets/assets";
+import Loader from "../../Components/Loader";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DoctorDashboard = () => {
   const {
@@ -13,9 +15,10 @@ const DoctorDashboard = () => {
     CancleAppointment,
     completeAppointment,
   } = useContext(DoctorContext);
+
   const { slotDateFormat } = useContext(AppContext);
 
-  const [loading, setLoading] = useState(true);  // Added loading state
+  const [loading, setLoading] = useState(true);
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -23,22 +26,22 @@ const DoctorDashboard = () => {
   const [fileName, setFileName] = useState("");
 
   useEffect(() => {
-  if (dToken) {
-    setLoading(true); // Start loading
-    const startTime = Date.now();
+    if (dToken) {
+      setLoading(true);
+      const startTime = Date.now();
 
-    getDashData().finally(() => {
-      const elapsed = Date.now() - startTime;
-      const minLoaderTime = 1500; // 1 second
+      getDashData().finally(() => {
+        const elapsed = Date.now() - startTime;
+        const minLoaderTime = 1500;
 
-      if (elapsed < minLoaderTime) {
-        setTimeout(() => setLoading(false), minLoaderTime - elapsed);
-      } else {
-        setLoading(false);
-      }
-    });
-  }
-}, [dToken]);
+        if (elapsed < minLoaderTime) {
+          setTimeout(() => setLoading(false), minLoaderTime - elapsed);
+        } else {
+          setLoading(false);
+        }
+      });
+    }
+  }, [dToken]);
 
   const handleWriteReport = (appointmentId, patientName) => {
     setSelectedAppointmentId(appointmentId);
@@ -47,21 +50,51 @@ const DoctorDashboard = () => {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB!");
+        setFileName("");
+        return;
+      }
+      setFileName(file.name);
+    } else {
+      setFileName("");
     }
   };
 
-  const handleSubmitReport = (e) => {
+  const handleSubmitReport = async (e) => {
     e.preventDefault();
-    // Here, you would submit the form using selectedAppointmentId and form data
-    alert(`Report submitted for ${selectedPatientName}`);
-    setIsReportModalOpen(false);
-    setFileName("");
+    try {
+      const formData = new FormData();
+      formData.append("appointmentId", selectedAppointmentId);
+      formData.append("title", e.target.title.value);
+      formData.append("medicines", e.target.medicines.value);
+      formData.append("file", e.target.file.files[0]);
+
+      const dtoken = localStorage.getItem("dToken");
+
+      const response = await axios.post(
+        "http://localhost:4000/api/doctor/upload-report",
+        formData,
+        { headers: { dtoken } }
+      );
+
+      if (response.data.success) {
+        toast.success("Report uploaded successfully!");
+        setIsReportModalOpen(false);
+        setFileName("");
+      } else {
+        toast.error("Failed to upload report: " + response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error uploading report!");
+    }
   };
 
   if (loading) {
-    return <Loader />;  // Show loader while loading
+    return <Loader />;
   }
 
   return (
@@ -69,7 +102,6 @@ const DoctorDashboard = () => {
       <div className="m-5">
         {/* Dashboard Cards */}
         <div className="flex flex-wrap gap-3">
-          {/* UI Boxes unchanged */}
           {[
             { label: "Appointments", value: dashData.appointments, icon: assets.appointments_icon, border: "green" },
             { label: "Patients", value: dashData.patients, icon: assets.patients_icon, border: "green" },
@@ -89,11 +121,9 @@ const DoctorDashboard = () => {
           ))}
         </div>
 
-         <Upload_Report />
-
         {/* Latest Appointments */}
-        <div className="bg-white">
-          <div className="flex items-center gap-2.5 px-4 py-4 mt-10 rounded-t border border-green-500">
+        <div className="bg-white mt-10">
+          <div className="flex items-center gap-2.5 px-4 py-4 rounded-t border border-green-500">
             <img src={assets.list_icon} alt="List icon" className="w-8 h-8" />
             <p className="font-semibold text-gray-600">Latest Appointment Bookings</p>
           </div>
