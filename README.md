@@ -49,3 +49,8 @@
    cd frontend
    npm run dev
    ```
+
+
+$env:GENAI_API_KEY="AIzaSyBw9_RkfwnLV3FwC-q5dvtteuMULrCtIBw"
+$env:FLASK_APP="Backend.app"
+python -m flask run --host=0.0.0.0 --port=5005
