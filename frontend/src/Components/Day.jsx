@@ -253,7 +253,7 @@ const Day = () => {
 
   return (
     <div
-      className="relative min-h-screen font-sans p-4 bg-gray-50"
+      className="relative font-sans p-4 bg-gray-50"
       style={{
         backgroundImage:
           'radial-gradient(at 80% 80%, #E0F2F1 0%, transparent 50%), radial-gradient(at 0% 0%, #D1C4E9 0%, transparent 50%)',
